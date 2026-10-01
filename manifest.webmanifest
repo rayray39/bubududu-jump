@@ -1,0 +1,19 @@
+{
+  "name": "Bubu & Dudu Jump",
+  "short_name": "BD Jump",
+  "description": "A mobile doodle-jump style game starring Dudu and Bubu.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#eaf8ff",
+  "theme_color": "#8fd3f4",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

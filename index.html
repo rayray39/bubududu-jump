@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#8fd3f4" />
+<meta name="description" content="Bubu &amp; Dudu Jump — a mobile doodle-jump style game starring Dudu and Bubu." />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Bubu &amp; Dudu Jump" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="assets/icon.svg" />
+<link rel="stylesheet" href="css/style.css" />
+<title>Bubu &amp; Dudu Jump</title>
+</head>
+<body>
+
+<canvas id="game" aria-label="Game canvas"></canvas>
+
+<!-- ───────── HUD (visible while playing) ───────── -->
+<div id="hud" class="layer hidden" aria-hidden="true">
+  <div class="hud-top">
+    <div class="score-chip"><span id="score">0</span><small>m</small></div>
+    <button id="pauseBtn" class="icon-btn" aria-label="Pause">❚❚</button>
+  </div>
+  <div id="touchHint" class="touch-hint">
+    <span class="hint-side">◀ tap &amp; hold</span>
+    <span class="hint-side">tap &amp; hold ▶</span>
+  </div>
+</div>
+
+<!-- ───────── Menu / character select ───────── -->
+<div id="menu" class="layer panel-layer">
+  <div class="panel">
+    <h1 class="title">Bubu <span>&amp;</span> Dudu</h1>
+    <p class="subtitle">Jump</p>
+
+    <p class="pick-label">Pick your jumper</p>
+    <div class="chars">
+      <button class="char-card" data-char="dudu" aria-pressed="false">
+        <canvas class="char-prev" width="120" height="120"></canvas>
+        <span class="char-name">Dudu</span>
+        <span class="char-best">Best <b data-best="dudu">0</b> m</span>
+      </button>
+      <button class="char-card" data-char="bubu" aria-pressed="false">
+        <canvas class="char-prev" width="120" height="120"></canvas>
+        <span class="char-name">Bubu</span>
+        <span class="char-best">Best <b data-best="bubu">0</b> m</span>
+      </button>
+    </div>
+
+    <button id="playBtn" class="primary-btn">Play</button>
+
+    <div class="options">
+      <div class="opt-row">
+        <span>Controls</span>
+        <div class="seg" id="controlSeg" role="group" aria-label="Control mode">
+          <button data-ctrl="touch" class="on">Touch</button>
+          <button data-ctrl="tilt">Tilt</button>
+        </div>
+      </div>
+      <div class="opt-row">
+        <span>Sound</span>
+        <div class="seg" id="soundSeg" role="group" aria-label="Sound">
+          <button data-snd="on" class="on">On</button>
+          <button data-snd="off">Off</button>
+        </div>
+      </div>
+    </div>
+    <p id="tiltNote" class="note hidden">Tilt your phone left and right to steer.</p>
+  </div>
+</div>
+
+<!-- ───────── Pause ───────── -->
+<div id="paused" class="layer panel-layer hidden">
+  <div class="panel small">
+    <h2>Paused</h2>
+    <button id="resumeBtn" class="primary-btn">Resume</button>
+    <button id="quitBtn" class="ghost-btn">Quit to menu</button>
+  </div>
+</div>
+
+<!-- ───────── Game over ───────── -->
+<div id="gameover" class="layer panel-layer hidden">
+  <div class="panel small">
+    <canvas id="goChar" class="go-char" width="120" height="120"></canvas>
+    <h2 id="goTitle">Oops!</h2>
+    <p class="go-score"><b id="goScore">0</b> m</p>
+    <p class="go-best">Best <b id="goBest">0</b> m</p>
+    <button id="retryBtn" class="primary-btn">Jump again</button>
+    <button id="menuBtn" class="ghost-btn">Change character</button>
+  </div>
+</div>
+
+<!-- ───────── Rotate-to-portrait nudge ───────── -->
+<div id="rotate" class="layer rotate-layer">
+  <div class="panel small">
+    <div class="rotate-icon">📱</div>
+    <h2>Turn your phone upright</h2>
+    <p class="note">This game is made for portrait mode.</p>
+  </div>
+</div>
+
+<script src="js/characters.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

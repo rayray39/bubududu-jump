@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#bfeaff"/>
+      <stop offset="1" stop-color="#eaf8ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#sky)"/>
+  <rect x="146" y="388" width="220" height="44" rx="22" fill="#5fb87f"/>
+  <rect x="146" y="388" width="220" height="30" rx="15" fill="#86d6a0"/>
+  <g stroke="#4a3a30" stroke-width="14" stroke-linejoin="round">
+    <circle cx="176" cy="178" r="48" fill="#3a3330"/>
+    <circle cx="336" cy="178" r="48" fill="#3a3330"/>
+    <ellipse cx="256" cy="246" rx="132" ry="126" fill="#fdfcf8"/>
+  </g>
+  <ellipse cx="203" cy="226" rx="39" ry="48" fill="#3a3330" transform="rotate(-26 203 226)"/>
+  <ellipse cx="309" cy="226" rx="39" ry="48" fill="#3a3330" transform="rotate(26 309 226)"/>
+  <circle cx="206" cy="226" r="17" fill="#2b2320"/>
+  <circle cx="306" cy="226" r="17" fill="#2b2320"/>
+  <circle cx="212" cy="219" r="6" fill="#fff"/>
+  <circle cx="312" cy="219" r="6" fill="#fff"/>
+  <ellipse cx="256" cy="271" rx="16" ry="12" fill="#2b2320"/>
+  <path d="M243 288a14 14 0 0 0 26 0" fill="none" stroke="#2b2320" stroke-width="8" stroke-linecap="round"/>
+  <ellipse cx="164" cy="268" rx="23" ry="15" fill="#f096aa" opacity=".5"/>
+  <ellipse cx="348" cy="268" rx="23" ry="15" fill="#f096aa" opacity=".5"/>
+</svg>
