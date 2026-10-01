@@ -1,6 +1,13 @@
 /* ============================================================
    characters.js — procedural sprites for Dudu & Bubu.
 
+   Modelled on the "Bubu & Dudu" (Yier & Bubu) sticker style:
+   a big wide head on a small pear-shaped body, tiny widely-set
+   bead eyes, a little open mouth, big round blush and stubby
+   limbs. Dudu is the plain brown bear (no muzzle patch); Bubu
+   is the all-white panda with black ears only (no eye patches).
+   Each carries a little crossbody bag.
+
    Everything is drawn with plain canvas primitives inside a
    1x1 unit box centred on the origin, then scaled to `size`.
    No image files, so nothing to preload and nothing to go
@@ -10,32 +17,28 @@
 const CHARACTERS = {
   dudu: {
     name: 'Dudu',
-    fur: '#b07c4f',
-    furDark: '#8d5f39',
-    ear: '#8d5f39',
-    muzzle: '#f2dcc0',
-    limb: '#9c6a42',
-    blush: 'rgba(224,122,95,.35)',
-    accent: '#5fb0e0',   // scarf
-    hasScarf: true,
-    hasBow: false
+    fur: '#a8714a',
+    ear: '#a8714a',
+    earInner: '#8f5d3b',
+    limb: '#a8714a',
+    blush: 'rgba(250,160,80,.8)',
+    bag: '#7fc6e6',
+    strap: '#5a9fc2'
   },
   bubu: {
     name: 'Bubu',
-    fur: '#fdfcf8',
-    furDark: '#e4ded2',
-    ear: '#3a3330',
-    muzzle: '#fdfcf8',
-    limb: '#3a3330',
-    blush: 'rgba(240,150,170,.45)',
-    accent: '#ff8fa3',   // bow
-    hasScarf: false,
-    hasBow: true,
-    patches: true        // panda eye patches
+    fur: '#fffdf9',
+    ear: '#2f2724',
+    earInner: null,
+    limb: '#fffdf9',
+    blush: 'rgba(250,150,170,.75)',
+    bag: '#f7d35e',
+    strap: '#d8ad2f'
   }
 };
 
-const OUTLINE = '#4a3a30';
+const OUTLINE = '#3b2a22';
+const INK = '#2a1e19';
 
 function _ellipse(ctx, x, y, rx, ry, fill, stroke, lw) {
   ctx.beginPath();
@@ -60,105 +63,125 @@ function drawCharacter(ctx, key, x, y, size, o) {
   const squash = Math.max(-0.3, Math.min(0.3, opt.squash || 0));
   const limbs = opt.limbs || 'idle';
   const dead = !!opt.dead;
-  const lw = size * 0.045;
+  const lw = 0.034;
 
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate((opt.roll || 0) + facing * 0.1);
   ctx.scale(size * (1 - squash * 0.55), size * (1 + squash));
   ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
 
-  // --- legs (behind body) ---
-  const legY = limbs === 'up' ? 0.46 : 0.5;
-  const legSpread = limbs === 'up' ? 0.30 : 0.22;
-  _ellipse(ctx, -legSpread, legY, 0.15, 0.11, c.limb, OUTLINE, lw / size);
-  _ellipse(ctx, legSpread, legY, 0.15, 0.11, c.limb, OUTLINE, lw / size);
+  // --- feet (behind body) ---
+  const footY = limbs === 'up' ? 0.53 : 0.54;
+  const footX = limbs === 'up' ? 0.19 : 0.15;
+  _ellipse(ctx, -footX, footY, 0.12, 0.075, c.limb, OUTLINE, lw);
+  _ellipse(ctx, footX, footY, 0.12, 0.075, c.limb, OUTLINE, lw);
 
-  // --- arms (behind body) ---
-  const armY = limbs === 'up' ? -0.22 : (limbs === 'fall' ? -0.30 : 0.14);
-  const armX = limbs === 'up' ? 0.46 : 0.45;
-  _ellipse(ctx, -armX, armY, 0.14, 0.11, c.limb, OUTLINE, lw / size);
-  _ellipse(ctx, armX, armY, 0.14, 0.11, c.limb, OUTLINE, lw / size);
-
-  // --- ears ---
-  for (const s of [-1, 1]) {
-    _ellipse(ctx, s * 0.34, -0.37, 0.17, 0.17, c.ear, OUTLINE, lw / size);
-    _ellipse(ctx, s * 0.34, -0.36, 0.08, 0.08, c.furDark, null, 0);
-  }
-
-  // --- body / head blob ---
-  _ellipse(ctx, 0, 0, 0.47, 0.45, c.fur, OUTLINE, lw / size);
-
-  // --- panda eye patches ---
-  if (c.patches) {
+  // --- raised arms sit behind the body ---
+  const raised = limbs !== 'idle';
+  if (raised) {
+    // 'up' = arms flung out to the sides, 'fall' = arms thrown overhead
+    const ax = limbs === 'up' ? 0.44 : 0.4;
+    const ay = limbs === 'up' ? 0.2 : -0.38;
+    const rot = limbs === 'up' ? -1.0 : -0.35;
     for (const s of [-1, 1]) {
       ctx.save();
-      ctx.translate(s * 0.19, -0.07);
-      ctx.rotate(s * 0.45);
-      _ellipse(ctx, 0, 0, 0.14, 0.17, c.ear, null, 0);
+      ctx.translate(s * ax, ay);
+      ctx.rotate(s * rot);
+      _ellipse(ctx, 0, 0, 0.075, 0.13, c.limb, OUTLINE, lw);
       ctx.restore();
     }
   }
 
-  // --- muzzle ---
-  _ellipse(ctx, 0, 0.17, 0.21, 0.15, c.muzzle, null, 0);
+  // --- body: small pear under the head ---
+  ctx.beginPath();
+  ctx.moveTo(-0.24, 0.18);
+  ctx.bezierCurveTo(-0.36, 0.34, -0.36, 0.58, -0.12, 0.58);
+  ctx.lineTo(0.12, 0.58);
+  ctx.bezierCurveTo(0.36, 0.58, 0.36, 0.34, 0.24, 0.18);
+  ctx.closePath();
+  ctx.fillStyle = c.fur; ctx.fill();
+  ctx.strokeStyle = OUTLINE; ctx.lineWidth = lw; ctx.stroke();
 
-  // --- eyes ---
-  const px = facing * 0.025;
+  // --- crossbody bag: strap over the shoulder, pouch on the hip ---
+  ctx.beginPath();
+  ctx.moveTo(-0.2, 0.22);
+  ctx.quadraticCurveTo(0.02, 0.36, 0.2, 0.44);
+  ctx.strokeStyle = c.strap; ctx.lineWidth = 0.035; ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0.12, 0.38);
+  ctx.lineTo(0.34, 0.38);
+  ctx.quadraticCurveTo(0.35, 0.53, 0.23, 0.53);
+  ctx.quadraticCurveTo(0.11, 0.53, 0.12, 0.38);
+  ctx.closePath();
+  ctx.fillStyle = c.bag; ctx.fill();
+  ctx.strokeStyle = OUTLINE; ctx.lineWidth = lw * 0.8; ctx.stroke();
+
+  // --- resting arms: little nubs hugging the body ---
+  if (!raised) {
+    for (const s of [-1, 1]) {
+      ctx.save();
+      ctx.translate(s * 0.27, 0.33);
+      ctx.rotate(s * 0.35);
+      _ellipse(ctx, 0, 0, 0.07, 0.11, c.limb, OUTLINE, lw);
+      ctx.restore();
+    }
+  }
+
+  // --- ears ---
   for (const s of [-1, 1]) {
-    const ex = s * 0.19, ey = -0.07;
+    _ellipse(ctx, s * 0.31, -0.37, 0.125, 0.115, c.ear, OUTLINE, lw);
+    if (c.earInner) _ellipse(ctx, s * 0.31, -0.36, 0.06, 0.055, c.earInner, null, 0);
+  }
+
+  // --- head: wide, slightly flattened ---
+  _ellipse(ctx, 0, -0.08, 0.48, 0.37, c.fur, OUTLINE, lw);
+
+  // --- blush: big soft circles under the eyes ---
+  _ellipse(ctx, -0.29, 0.04, 0.095, 0.08, c.blush, null, 0);
+  _ellipse(ctx, 0.29, 0.04, 0.095, 0.08, c.blush, null, 0);
+
+  // --- eyes: tiny widely-set beads ---
+  const px = facing * 0.02;
+  for (const s of [-1, 1]) {
+    const ex = s * 0.18 + px, ey = -0.07;
     if (dead) {
-      // X_X
-      ctx.strokeStyle = OUTLINE;
-      ctx.lineWidth = 0.05;
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 0.04;
       ctx.beginPath();
-      ctx.moveTo(ex - 0.06, ey - 0.06); ctx.lineTo(ex + 0.06, ey + 0.06);
-      ctx.moveTo(ex + 0.06, ey - 0.06); ctx.lineTo(ex - 0.06, ey + 0.06);
+      ctx.moveTo(ex - 0.045, ey - 0.045); ctx.lineTo(ex + 0.045, ey + 0.045);
+      ctx.moveTo(ex + 0.045, ey - 0.045); ctx.lineTo(ex - 0.045, ey + 0.045);
       ctx.stroke();
     } else {
-      _ellipse(ctx, ex + px, ey, 0.062, 0.072, '#2b2320', null, 0);
-      _ellipse(ctx, ex + px + 0.022, ey - 0.028, 0.022, 0.024, '#fff', null, 0);
+      _ellipse(ctx, ex, ey, 0.045, 0.056, INK, null, 0);
+      _ellipse(ctx, ex + 0.015, ey - 0.022, 0.016, 0.018, '#fff', null, 0);
     }
   }
 
-  // --- nose + mouth ---
-  _ellipse(ctx, 0, 0.09, 0.055, 0.042, '#2b2320', null, 0);
-  ctx.strokeStyle = '#2b2320';
-  ctx.lineWidth = 0.028;
+  // --- mouth: small open "o" with a red tongue ---
+  const mx = px * 0.6, my = 0.03;
   if (dead) {
     ctx.beginPath();
-    ctx.arc(0, 0.26, 0.075, Math.PI, Math.PI * 2);           // frown
-    ctx.stroke();
+    ctx.arc(mx, my + 0.07, 0.05, Math.PI * 1.1, Math.PI * 1.9);
+    ctx.strokeStyle = INK; ctx.lineWidth = 0.03; ctx.stroke();
   } else {
-    for (const s of [-1, 1]) {                                // :3 smile, two separate strokes
+    const mouth = () => {
       ctx.beginPath();
-      ctx.arc(s * 0.045, 0.14, 0.05, 0.12, Math.PI - 0.12);
-      ctx.stroke();
-    }
-  }
-
-  // --- blush ---
-  _ellipse(ctx, -0.33, 0.08, 0.08, 0.055, c.blush, null, 0);
-  _ellipse(ctx, 0.33, 0.08, 0.08, 0.055, c.blush, null, 0);
-
-  // --- accessories ---
-  if (c.hasBow) {
+      ctx.moveTo(mx - 0.055, my);
+      ctx.lineTo(mx + 0.055, my);
+      ctx.quadraticCurveTo(mx + 0.055, my + 0.075, mx, my + 0.075);
+      ctx.quadraticCurveTo(mx - 0.055, my + 0.075, mx - 0.055, my);
+      ctx.closePath();
+    };
+    mouth();
+    ctx.fillStyle = '#5c2320'; ctx.fill();
     ctx.save();
-    ctx.translate(-0.42, -0.46);
-    ctx.rotate(-0.3);
-    _ellipse(ctx, -0.085, 0, 0.085, 0.065, c.accent, OUTLINE, lw / size);
-    _ellipse(ctx, 0.085, 0, 0.085, 0.065, c.accent, OUTLINE, lw / size);
-    _ellipse(ctx, 0, 0, 0.045, 0.045, '#ffd2dc', OUTLINE, lw / size);
+    ctx.clip();
+    _ellipse(ctx, mx, my + 0.075, 0.04, 0.032, '#ef6f6a', null, 0);
     ctx.restore();
-  }
-  if (c.hasScarf) {
-    ctx.beginPath();
-    ctx.ellipse(0, 0.33, 0.33, 0.1, 0, Math.PI * 0.08, Math.PI * 0.92);
-    ctx.fillStyle = c.accent;
-    ctx.fill();
-    ctx.strokeStyle = OUTLINE;
-    ctx.lineWidth = lw / size;
-    ctx.stroke();
+    mouth();
+    ctx.strokeStyle = INK; ctx.lineWidth = 0.02; ctx.stroke();
   }
 
   ctx.restore();

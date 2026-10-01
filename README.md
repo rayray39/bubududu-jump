@@ -45,7 +45,7 @@ python3 -m http.server 8911
 ```
 index.html              markup + all UI overlays
 css/style.css           mobile-first styling, safe-area aware
-js/characters.js        Dudu & Bubu drawn procedurally with canvas primitives
+js/characters.js        Dudu (brown bear) & Bubu (white panda), drawn procedurally
 js/game.js              physics, platform generation, camera, input, rendering
 assets/icon.svg         app icon
 manifest.webmanifest    installable as a fullscreen home-screen app
