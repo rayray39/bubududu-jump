@@ -29,7 +29,22 @@ PICK_TARGET = """() => {
 }"""
 
 
+# Largest vertical distance between two platforms the player can stand on
+# (breakables don't count). Must stay below the height of one jump.
+MAX_SOLID_GAP = """() => {
+  const g = window.__bdj;
+  const ys = g.platforms.filter(p => p.type !== 'break' && !p.broken)
+    .map(p => p.y).sort((a, b) => a - b);
+  let worst = 0;
+  for (let i = 1; i < ys.length; i++) worst = Math.max(worst, ys[i] - ys[i - 1]);
+  return { worst, limit: g.MAX_GAP, rise: g.JUMP_RISE };
+}"""
+worst_gap = 0
+gap_limit = 0
+
+
 def run(page, seconds, label):
+    global worst_gap, gap_limit
     """Hold the correct screen half each tick so the bot lands on platforms."""
     held = False
     ticks = int(seconds * 1000 / 60)
@@ -37,6 +52,10 @@ def run(page, seconds, label):
         t = page.evaluate(PICK_TARGET)
         if t is None:
             break
+        if i % 10 == 0:
+            gap = page.evaluate(MAX_SOLID_GAP)
+            worst_gap = max(worst_gap, gap["worst"])
+            gap_limit = gap["limit"]
         if t["tx"] is None:
             dx = 0
         else:
@@ -114,6 +133,10 @@ with sync_playwright() as p:
 
 if errors:
     print("ERRORS:\n" + "\n".join(errors))
+    sys.exit(1)
+print(f"widest gap between standable platforms: {worst_gap:.0f} px (limit {gap_limit}px)")
+if worst_gap > gap_limit + 0.5:   # float drift from camera scrolling
+    print("FAIL: a platform gap is wider than the character can jump")
     sys.exit(1)
 if score < 90:
     print(f"FAIL: bot only climbed {score} m in 25s — platform spacing is likely unplayable")
