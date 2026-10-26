@@ -20,6 +20,17 @@
   const SCROLL_LINE = 0.42;       // camera pushes once the player is this far up
 
   const PLAT_W = 70, PLAT_H = 15;
+
+  // How high a normal bounce actually lifts the feet, simulated with the
+  // same integration order as tick(). The vertical distance between any two
+  // platforms you can stand on is kept well under this, leaving air time to
+  // steer sideways.
+  const JUMP_RISE = (() => {
+    let rise = 0, vy = JUMP_V;
+    for (;;) { vy += GRAVITY; if (vy >= 0) return rise; rise -= vy; }
+  })();
+  const MAX_GAP = Math.floor(JUMP_RISE * 0.8);   // ≈ 139 px
+  const BREAK_ROOM = 40;                         // min space above a breakable
   const PLAYER_W = 42;
 
   const SKIES = [
@@ -107,6 +118,7 @@
   const player = { x: VW / 2, y: 0, py: 0, vx: 0, vy: 0, squash: 0, facing: 0 };
   let platforms = [], clouds = [], puffs = [];
   let topMost = 0;          // y of the highest platform generated
+  let topSolid = 0;         // y of the highest platform you can stand on (not breakable)
   let scrolled = 0;         // total distance climbed, in logical px
   let score = 0, deathT = 0;
 
@@ -135,12 +147,15 @@
   }
 
   function generateUpTo(limitY) {
-    let lastBreakable = false;
     while (topMost > limitY) {
       const d = diff();
-      topMost -= rnd(58 + 24 * d, 96 + 36 * d);
-      const p = makePlatform(topMost, lastBreakable);
-      lastBreakable = p.type === 'break';
+      // no two breakables in a row; a breakable must leave room for a solid
+      // platform above it that is still within one jump of the last solid one
+      const p = makePlatform(0, topMost !== topSolid);
+      const reach = p.type === 'break' ? MAX_GAP - BREAK_ROOM : MAX_GAP;
+      p.y = Math.max(topMost - rnd(58 + 24 * d, 96 + 36 * d), topSolid - reach);
+      topMost = p.y;
+      if (p.type !== 'break') topSolid = p.y;
       platforms.push(p);
     }
   }
@@ -163,7 +178,7 @@
 
     // a guaranteed landing pad right under the player, then fill the screen
     platforms.push({ x: VW / 2 - PLAT_W / 2, y: VH * 0.78, w: PLAT_W, h: PLAT_H, type: 'normal', vx: 0, broken: false, fallV: 0, springT: 0, shake: 0 });
-    topMost = VH * 0.78;
+    topMost = topSolid = VH * 0.78;
     generateUpTo(-VH);
     seedClouds();
     tiltBase = null;
@@ -304,6 +319,7 @@
       for (const p of platforms) p.y += d;
       for (const q of puffs) q.y += d;
       topMost += d;
+      topSolid += d;
       for (const c of clouds) {
         c.y += d * 0.3;
         if (c.y - c.r > VH) { c.y = -c.r - rnd(0, 120); c.x = rnd(0, VW); }
@@ -572,6 +588,8 @@
       VW,
       get VH() { return VH; },
       get platforms() { return platforms; },
+      JUMP_RISE,
+      MAX_GAP,
       get playing() { return state === STATE.PLAY; },
       get score() { return score; }
     };
